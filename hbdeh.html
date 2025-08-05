@@ -202,7 +202,6 @@
 
   <div id="giftPopup" class="popup hidden">
     <div class="popup-content">
-      <h2>Hadiah lu</h2>
       <p>Gosok biar keliatan</p>
         <div class="scratch-container">
           <div id="steamCode" class="code-text">N2HBD-KA48X-YIM8Q</div>
@@ -269,7 +268,7 @@
       }
     });
 
-    const sequence = [["/"], ["."], ["m"], ["n", "o"], ["y"], ["o"], ["/"], ["."], ["n"], ["i", "m"], ["y"], ["i"], ["f"], ["k"], ["l"], [";", "h"], ["y"], ["i"], ["n"], ["l"], [";"], ["/", "h"], ["i"], ["h"], ["k"], ["l"], [";"], ["j", "p", "n"], ["u"], ["o", ";"], ["g"]];
+    const sequence = [["/"], ["."], ["m"], ["n","o"], ["y"], ["o"], ["/"], ["."], ["n"], ["i","m"], ["y"], ["i"], ["g"], ["k"], ["l"], [";","h"], ["y"], ["i"], ["n"], ["l"], [";"], ["/","h"], ["i"], ["h"], ["k"], ["l"], [";"], ["j","p","n"], ["u"], ["o",";"], ["f"], ["y","i","h"], ["f"], ["i","o","k"], ["g"], ["y"], ["o"], ["f"], ["j"], ["k"], ["p","i","l"], ["j"], ["i"], ["p"], ["j"], ["k"], ["o","u","k"], ["h"], ["y"], ["h"], ["j"], ["k"], ["j"], ["k","p"], ["l"], ["u"], ["g"], ["p"], ["p"], ["y","p","h"], ["f"], ["p"], ["k"], ["f"], ["u","p","j"], ["f"], ["p"], ["p"], ["h","y"], ["y"], ["p","u"], ["i"], ["o"], ["l"], ["k","y"], ["u"], ["i"], ["o"], ["p"], ["p"], ["i","m"], ["y"], [";","i"], ["f"], ["k"], ["j","u"], ["h"], ["h","y"], ["c"], ["n"], ["n"], ["p",";"], ["u"], ["k","p"], ["l","p"], ["u"], ["k","y"], ["u"], ["i"], ["o"], ["i","p"], ["p"], ["h","y"], ["u"], ["i","p"], ["o"], ["p"], ["k"], ["y","o","j"], ["u"], ["i"], ["o"], ["i","p"], ["p"], ["y","h"], ["u"], ["i","p"], ["o"], ["p"], ["l","u"], ["p","i","y","k"], ["u"], ["i"], ["o"], ["i","p"], ["p"], ["i","m"], ["y"], ["i"], [";"], ["k"], ["p"], ["o","h"], ["y"], ["p","o"], ["f"], ["n"], ["n"], [";","p"], ["u"], ["k","p"], ["g","f","g"], ["p","l"], ["u"], ["y","k"], ["u"], ["i"], ["/","y"], ["i","."], ["m"], ["o","n"], ["y"], ["o"], ["/","y"], [".","u"], ["n"], ["i","m"], ["j"], ["i"], ["k"], ["l"], ["h",";"], ["j"], ["i"], ["n"], ["l"], [";"], ["/","h"], ["i"], ["h"], ["k"], ["l"], [";"], ["o","h"], ["y"], ["o"], ["h"], ["j"], ["k"], ["l","p"], ["u"], ["o"], ["k"], ["j"], ["l"], ["k","y"], ["p"], ["y"], ["u"], ["i"], ["p"], ["i","y"], ["p"], ["k"]];
 
     document.getElementById('startButton').addEventListener('click', () => {
       let delay = 0;
@@ -298,8 +297,8 @@
       "heheheheh", "Gw juga ada beberapa video penampakan lu", "rahul", "Jadi keinget juga",
       "Waktu kita tinggal di kolong jembatan", "Pas lu gw cebokin lu kecebur", "andawata", "Gw bikin piano juga, bisa lu mainin juga kalo mau", "pwiano", 
       "Semoga tahun ini lu lebih bahagia", "Jadi lebih bijak", "Dan lebih banyak nemuin hal hal yang beneran penting",
-      "Tetep jadi diri sendiri", "Tetep jadi orang baik", "Jangan lupa juga", "Tahun ini lu juga jadi satu langkah lebih deket",
-      "jadi orang yang punya masa depan", "Jadi hati hati sama pilihan hidupnya", "dan hadiah dari gw itu.....", "swteam"
+      "Tetep jadi diri sendiri", "Tetep jadi orang baik", "Jangan lupa juga", "Tahun ini lu juga jadi satu langkah lebih deket", "Sama tuhan....",
+      "maksudnya jadi orang yang punya masa depan", "Jadi hati hati sama pilihan hidupnya", "dan hadiah dari gw itu.....", "swteam"
     ];
 
     const textElement = document.getElementById("typewriterText");
@@ -408,14 +407,16 @@
             typewriterContainer.classList.add("hidden");
             mainContent.classList.remove("hidden");
             waitForLanjut = true;
+            bgm.volume = 0;
             nextAfterPiano.onclick = () => {
               mainContent.classList.add("hidden");
+              bgm.volume = 0.2;
               typewriterContainer.classList.remove("hidden");
               waitForLanjut = false;
               showNextSentence();
             };
           } else if (sentence.includes("swteam")) {
-            showGiftPopup() 
+            showGiftPopup();
           } else {
             typewriterEffect(sentence, () => {
               setTimeout(showNextSentence, 1500);
@@ -487,6 +488,7 @@
     }
 
     document.getElementById("redeemBtn").addEventListener("click", function () {
+      bgm.volume = 0;
       document.getElementById("giftPopup").classList.add("hidden");
       document.getElementById("videoPopup").classList.remove("hidden");
 
