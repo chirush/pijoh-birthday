@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Birthday Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @font-face {
+      font-family: 'Handcaps';
+      src: url('font/Handcaps.otf') format('opentype');
+    }
+    @font-face {
+      font-family: 'Beachday';
+      src: url('font/beachday.ttf') format('truetype');
+    }
+
+    .beachday { font-family: 'Beachday', cursive; }
+    .handcaps { font-family: 'Handcaps', cursive; }
+
+    .keyboard { display: flex; flex-direction: column; gap: 10px; }
+    .row { display: flex; gap: 10px; }
+
+    .key {
+      width: 150px; height: 150px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      text-align: center; line-height: 150px;
+      color: white; font-size: 1.2rem;
+      cursor: pointer; user-select: none;
+      transition: background 0.2s, transform 0.1s;
+      pointer-events: none;
+    }
+
+    .key.active, .key:active {
+      background: #ADD8E6;
+      opacity: 0.8;
+      transform: scale(0.85);
+    }
+
+    .fade-in { opacity: 0; transition: opacity 1s ease-in-out; }
+    .fade-in.show { opacity: 1; }
+
+    .floating-photo {
+      position: absolute;
+      padding: 10px;
+      background: white;
+      border: 4px solid #ddd;
+      box-shadow: 5px 8px 20px rgba(0,0,0,0.2);
+      transition: all 0.5s ease-in-out;
+      opacity: 0;
+      transform: translateY(-100px) rotate(-10deg);
+      z-index: 1;
+    }
+
+    .floating-photo::before, .floating-photo::after {
+      content: '';
+      position: absolute;
+      width: 30px;
+      height: 30px;
+      background: #d4af37;
+      z-index: 10;
+    }
+
+    .floating-photo::before {
+      top: 0;
+      left: 0;
+      transform: rotate(-10deg);
+    }
+
+    .floating-photo::after {
+      top: 0;
+      right: 0;
+      transform: rotate(10deg);
+    }
+
+    .floating-photo.show {
+      opacity: 1;
+      transform: translateY(0) rotate(0deg);
+    }
+
+    .popup {
+      position: fixed;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: rgba(0,0,0,0.6);
+      z-index: 1000;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .popup-content {
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      animation: popIn 0.4s ease;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    .scratch-container {
+      position: relative;
+      width: 100%;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+
+    .code-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 20px;
+      font-weight: bold;
+      letter-spacing: 2px;
+      z-index: 0;
+    }
+
+    #scratchCanvas {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      background: transparent;
+      width: 100%;
+      height: 100%; 
+    }
+
+    @keyframes popIn {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+<body class="handcaps bg-cover bg-center min-h-screen" style="background-image: url('background/bg1.png');">
+  <div id="startScreen" class="fixed inset-0 flex items-center justify-center z-50">
+    <button id="startMulai" class="bg-white text-blue-700 font-bold px-6 py-3 rounded-full shadow-md hover:bg-blue-200 transition text-2xl">Mulai</button>
+  </div>
+
+  <div id="typewriterContainer" class="flex items-center justify-center h-screen">
+    <h1 id="typewriterText" class="text-4xl md:text-5xl text-white beachday fade-in" style="text-shadow: 2px 2px 4px rgba(0,0,0,0.4);"></h1>
+  </div>
+
+  <div id="photoAlbum" class="hidden relative w-full h-screen flex items-center justify-center bg-black bg-opacity-40">
+    <div id="floatingPhotos" class="relative w-full h-full"></div>
+  </div>
+
+  <div id="mainContent" class="hidden flex flex-col items-center justify-center min-h-screen text-center relative overflow-hidden px-4">
+    <div class="keyboard">
+      <div class="row">
+        <div class="key" data-note="0">Y</div>
+        <div class="key" data-note="1">U</div>
+        <div class="key" data-note="2">I</div>
+        <div class="key" data-note="3">O</div>
+        <div class="key" data-note="4">P</div>
+      </div>
+      <div class="row">
+        <div class="key" data-note="5">H</div>
+        <div class="key" data-note="6">J</div>
+        <div class="key" data-note="7">K</div>
+        <div class="key" data-note="8">L</div>
+        <div class="key" data-note="9">;</div>
+      </div>
+      <div class="row">
+        <div class="key" data-note="10">B</div>
+        <div class="key" data-note="11">N</div>
+        <div class="key" data-note="12">M</div>
+        <div class="key" data-note="13"><</div>
+        <div class="key" data-note="14">/</div>
+      </div>
+    </div>
+    <div class="flex space-x-4 mt-4">
+      <button id="startButton" class="bg-white text-blue-700 font-bold px-6 py-3 rounded-full shadow-md hover:bg-blue-200 transition hidden">
+        Lagu dari gw
+      </button>
+      <button id="nextAfterPiano" class="bg-white text-green-700 font-bold px-6 py-3 rounded-full shadow-md hover:bg-green-200 transition hidden">
+        Lanjut
+      </button>
+    </div>
+  </div>
+
+  <audio id="bgm" src="hbd.mp3" loop></audio>
+
+  <div id="videoWrapper" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-[100]">
+    <video id="specialVideo" class="w-[640px] max-w-full rounded-xl shadow-xl" autoplay muted playsinline>
+      <source src="videos/ash.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <div id="videoWrapper2" class="hidden fixed inset-0 flex items-center justify-center bg-black bg-opacity-80 z-[100]">
+    <video id="specialVideo2" class="w-[640px] max-w-full rounded-xl shadow-xl" autoplay muted playsinline>
+      <source src="videos/ash2.mp4" type="video/mp4" />
+    </video>
+  </div>
+
+  <div id="giftPopup" class="popup hidden">
+    <div class="popup-content">
+      <h2>Hadiah lu</h2>
+      <p>Gosok biar keliatan</p>
+        <div class="scratch-container">
+          <div id="steamCode" class="code-text">N2HBD-KA48X-YIM8Q</div>
+          <canvas id="scratchCanvas"></canvas>
+        </div>
+      <p>Redeemnya di steam</p>
+      <button id="redeemBtn" class="bg-white text-blue-700 font-bold px-6 py-3 rounded-full shadow-md hover:bg-blue-200 transition text-xl">Terakhir </button>
+    </div>
+  </div>
+
+  <div id="videoPopup" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 hidden">
+    <div class="bg-white rounded-xl overflow-hidden shadow-lg max-w-3xl w-full m-4">
+      <div class="text-center px-6 pt-6">
+        <h3 class="beachday bg-white text-blue-800 text-3xl px-8 py-6 rounded-xl">LU JOMOK</h3>
+      </div>
+      <div class="mx-4 mb-8 mb-2 rounded-lg overflow-hidden">
+        <video id="localVideo" class="w-full rounded-lg h-[350px]" autoplay controls loop>
+          <source src="videos/kentut.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const bgm = document.getElementById("bgm");
+    bgm.volume = 0.2;
+
+    const notes = {
+      '0': 'notes/0.mp3', '1': 'notes/1.mp3', '2': 'notes/2.mp3', '3': 'notes/3.mp3', '4': 'notes/4.mp3',
+      '5': 'notes/5.mp3', '6': 'notes/6.mp3', '7': 'notes/7.mp3', '8': 'notes/8.mp3', '9': 'notes/9.mp3',
+      '10': 'notes/10.mp3', '11': 'notes/11.mp3', '12': 'notes/12.mp3', '13': 'notes/13.mp3', '14': 'notes/14.mp3',
+    };
+
+    const keyMap = {
+      'y': '0', 'u': '1', 'i': '2', 'o': '3', 'p': '4',
+      'h': '5', 'j': '6', 'k': '7', 'l': '8', ';': '9',
+      'n': '10', 'm': '11', ',': '12', '.': '13', '/': '14',
+    };
+
+    function playNote(note) {
+      const audio = new Audio(notes[note]);
+      audio.play();
+    }
+
+    let hasStarted = false;
+
+    document.addEventListener('keydown', (e) => {
+      if (!hasStarted) {
+        hasStarted = true;
+        setTimeout(() => {
+          document.getElementById('startButton').classList.remove('hidden');
+          document.getElementById('nextAfterPiano').classList.remove('hidden'); 
+        }, 30000);
+      }
+
+      const note = keyMap[e.key];
+      if (note && notes[note]) {
+        playNote(note);
+        const keyElement = document.querySelector(`.key[data-note="${note}"]`);
+        if (keyElement) {
+          keyElement.classList.add('active');
+          setTimeout(() => keyElement.classList.remove('active'), 300);
+        }
+      }
+    });
+
+    const sequence = [["/"], ["."], ["m"], ["n", "o"], ["y"], ["o"], ["/"], ["."], ["n"], ["i", "m"], ["y"], ["i"], ["f"], ["k"], ["l"], [";", "h"], ["y"], ["i"], ["n"], ["l"], [";"], ["/", "h"], ["i"], ["h"], ["k"], ["l"], [";"], ["j", "p", "n"], ["u"], ["o", ";"], ["g"]];
+
+    document.getElementById('startButton').addEventListener('click', () => {
+      let delay = 0;
+      sequence.forEach(group => {
+        setTimeout(() => {
+          group.forEach(key => {
+            const note = keyMap[key];
+            if (note && notes[note]) {
+              playNote(note);
+              const keyElement = document.querySelector(`.key[data-note="${note}"]`);
+              if (keyElement) {
+                keyElement.classList.add('active');
+                setTimeout(() => keyElement.classList.remove('active'), 300);
+              }
+            }
+          });
+        }, delay);
+        delay += 300;
+      });
+    });
+
+    const sentences = [
+      "In the beningging", "in the beging-", "in the begingning", "anj lah", "Happy Birthday Pijohh!! 🎉", "Sekarang umur lu udah 18 tahun", "Makin kesini makin TUA",
+      "Udah legal juga sekarang", "Makasih karena sering main sama gw", "Kita banyak ngelakuin hal barengan juga", "piarcet",
+      "Adanya foto VRCHAT doang cog aowkawok", "Cakep banget avatar gw anjir", "Tapi lebih cakep ini sih", "rechii",
+      "heheheheh", "Gw juga ada beberapa video penampakan lu", "rahul", "Jadi keinget juga",
+      "Waktu kita tinggal di kolong jembatan", "Pas lu gw cebokin lu kecebur", "andawata", "Gw bikin piano juga, bisa lu mainin juga kalo mau", "pwiano", 
+      "Semoga tahun ini lu lebih bahagia", "Jadi lebih bijak", "Dan lebih banyak nemuin hal hal yang beneran penting",
+      "Tetep jadi diri sendiri", "Tetep jadi orang baik", "Jangan lupa juga", "Tahun ini lu juga jadi satu langkah lebih deket",
+      "jadi orang yang punya masa depan", "Jadi hati hati sama pilihan hidupnya", "dan hadiah dari gw itu.....", "swteam"
+    ];
+
+    const textElement = document.getElementById("typewriterText");
+    const typewriterContainer = document.getElementById("typewriterContainer");
+    const photoAlbum = document.getElementById("photoAlbum");
+    const floatingPhotos = document.getElementById("floatingPhotos");
+    const mainContent = document.getElementById("mainContent");
+    const nextAfterPiano = document.getElementById("nextAfterPiano");
+
+    let index = 0;
+    let waitForLanjut = false;
+
+    function showFloatingPhotos() {
+      const images = Array.from({ length: 15 }, (_, i) => `images/${i + 1}.png`);
+      images.forEach((src, i) => {
+        const div = document.createElement("div");
+        div.className = "floating-photo w-48 h-36";
+        div.style.top = `${Math.random() * 60 + 10}%`;
+        div.style.left = `${Math.random() * 70 + 10}%`;
+        div.style.transform = `translateY(-100px) rotate(${Math.random() * 20 - 10}deg)`;
+        div.innerHTML = `<img src="${src}" class="w-full h-full object-cover rounded">`;
+        floatingPhotos.appendChild(div);
+        setTimeout(() => {
+          div.classList.add("show");
+          setTimeout(() => {
+            div.classList.remove("show");
+            setTimeout(() => div.remove(), 1000);
+          }, 20000);
+        }, i * 400);
+      });
+    }
+
+    function showBigFloatingPhotos() {
+      const images = ["images/big1.png", "images/big2.png", "images/big3.png"];
+      images.forEach((src, i) => {
+        const div = document.createElement("div");
+        div.className = "floating-photo w-72 h-60";
+        div.style.top = `${Math.random() * 50 + 10}%`;
+        div.style.left = `${Math.random() * 60 + 10}%`;
+        div.style.transform = `translateY(-100px) rotate(${Math.random() * 20 - 10}deg)`;
+        div.innerHTML = `<img src="${src}" class="w-full h-full object-cover rounded">`;
+        floatingPhotos.appendChild(div);
+        setTimeout(() => {
+          div.classList.add("show");
+          setTimeout(() => {
+            div.classList.remove("show");
+            setTimeout(() => div.remove(), 1000);
+          }, 20000);
+        }, i * 500);
+      });
+    }
+
+    function showNextSentence() {
+      if (waitForLanjut) return;
+      textElement.classList.remove("show");
+
+      setTimeout(() => {
+        if (index < sentences.length) {
+          const sentence = sentences[index++];
+
+          if (sentence.includes("piarcet")) {
+            typewriterContainer.classList.add("hidden");
+            photoAlbum.classList.remove("hidden");
+            showFloatingPhotos();
+            setTimeout(() => {
+              photoAlbum.classList.add("hidden");
+              typewriterContainer.classList.remove("hidden");
+              showNextSentence();
+            }, 20000);
+          } else if (sentence.includes("rechii")) {
+            typewriterContainer.classList.add("hidden");
+            photoAlbum.classList.remove("hidden");
+            showBigFloatingPhotos();
+            setTimeout(() => {
+              photoAlbum.classList.add("hidden");
+              typewriterContainer.classList.remove("hidden");
+              showNextSentence();
+            }, 10000);
+          } else if (sentence.includes("rahul")) {
+            const videoWrapper = document.getElementById("videoWrapper");
+            const video = document.getElementById("specialVideo");
+            typewriterContainer.classList.add("hidden");
+            videoWrapper.classList.remove("hidden");
+            video.currentTime = 0;
+            video.muted = false;
+            video.play();
+            video.onended = () => {
+              videoWrapper.classList.add("hidden");
+              typewriterContainer.classList.remove("hidden");
+              showNextSentence();
+            };
+          } else if (sentence.includes("andawata")) {
+            const videoWrapper = document.getElementById("videoWrapper2");
+            const video = document.getElementById("specialVideo2");
+            typewriterContainer.classList.add("hidden");
+            videoWrapper.classList.remove("hidden");
+            video.currentTime = 0;
+            video.muted = false;
+            video.play();
+            video.onended = () => {
+              videoWrapper.classList.add("hidden");
+              typewriterContainer.classList.remove("hidden");
+              showNextSentence();
+            };
+          } else if (sentence.includes("pwiano")) {
+            typewriterContainer.classList.add("hidden");
+            mainContent.classList.remove("hidden");
+            waitForLanjut = true;
+            nextAfterPiano.onclick = () => {
+              mainContent.classList.add("hidden");
+              typewriterContainer.classList.remove("hidden");
+              waitForLanjut = false;
+              showNextSentence();
+            };
+          } else if (sentence.includes("swteam")) {
+            showGiftPopup() 
+          } else {
+            typewriterEffect(sentence, () => {
+              setTimeout(showNextSentence, 1500);
+            });
+          }
+        }
+      }, 500);
+    }
+
+    function typewriterEffect(text, callback) {
+      textElement.innerHTML = "";
+      textElement.classList.add("show");
+      let i = 0;
+      const interval = setInterval(() => {
+        textElement.innerHTML += text.charAt(i);
+        i++;
+        if (i > text.length) {
+          clearInterval(interval);
+          if (callback) callback();
+        }
+      }, 50);
+    }
+
+    document.getElementById("startMulai").addEventListener("click", () => {
+      document.getElementById("startScreen").classList.add("hidden");
+      bgm.play();
+      showNextSentence();
+    });
+
+    function showGiftPopup() {
+      document.getElementById("giftPopup").classList.remove("hidden");
+      initScratchCard();
+    }
+
+    function initScratchCard() {
+      const canvas = document.getElementById("scratchCanvas");
+      const ctx = canvas.getContext("2d");
+
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+
+      ctx.fillStyle = "#bbb";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      ctx.globalCompositeOperation = "destination-out";
+
+      let isDrawing = false;
+      canvas.addEventListener("mousedown", () => isDrawing = true);
+      canvas.addEventListener("mouseup", () => isDrawing = false);
+      canvas.addEventListener("mouseleave", () => isDrawing = false);
+
+      canvas.addEventListener("mousemove", (e) => {
+        if (!isDrawing) return;
+        ctx.beginPath();
+        ctx.arc(e.offsetX, e.offsetY, 15, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      canvas.addEventListener("mouseup", () => {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        let transparentPixels = 0;
+        for (let i = 3; i < imageData.data.length; i += 4) {
+          if (imageData.data[i] === 0) transparentPixels++;
+        }
+        if (transparentPixels / (canvas.width * canvas.height) > 0.7) {
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+      });
+    }
+
+    document.getElementById("redeemBtn").addEventListener("click", function () {
+      document.getElementById("giftPopup").classList.add("hidden");
+      document.getElementById("videoPopup").classList.remove("hidden");
+
+      const video = document.getElementById("localVideo");
+      video.loop = true;
+      video.play();
+    });
+
+
+  </script>
+</body>
+</html>
